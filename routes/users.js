@@ -1,8 +1,6 @@
 const db = require('../db.js')
 const mysql = require('mysql')
 var express = require('express');
-var router = express.Router();
-var https = require("https");
 var cors = require("cors");
 
 /* GET users listing. */
@@ -11,8 +9,8 @@ var cors = require("cors");
 /* mysql> status; ==> shows connection information which you'll need later */
 /* insert into student_user values (120, 'ugo', 'etudo', 'etudouo@vcu.edu', now()); */
 
+var router = express.Router();
 const connection = mysql.createConnection(db.conn_info)
-
 connection.connect()
 
 var corsOptions = {
