@@ -19,7 +19,7 @@ const time_left = (result) => {
     const yr = tn.getFullYear()
     const dt = tn.getDate()
     const mnt = tn.getMonth()
-    const dow = day_names[dtw]
+    const dow = day_names[dtw - 1]
 
     var final_result = []
     result.forEach((r, ix) => {
@@ -46,7 +46,7 @@ const time_left = (result) => {
                     break
                 }
             case 'f':
-                if (r.t == 1) {
+                if (r.f == 1) {
                     is_today = true
                     break
                 }
@@ -54,7 +54,7 @@ const time_left = (result) => {
         if (is_today) {
             var time_parts = r.time_of_day.split(":")
             var mins_left = (new Date(yr, mnt, dt, time_parts[0], time_parts[1], time_parts[2]) - new Date())/60000
-            final_result[ix] = [result, mins_left]
+            final_result[ix] = [r, mins_left]
         }
     })
     return final_result.filter( Boolean ) // list of [result, mins_left]
@@ -66,12 +66,25 @@ const time_left = (result) => {
 
 router.get("/", cors(corsOptions), (req, res, next) => {
     const vnum = req.query.vnum
-    connection.query('select * from enrollement e, course_section cs, course c ' +
+    if (vnum)
+    {
+        connection.query('select * from enrollment e, course_section cs, course c ' +
                      'where e.section_no = cs.section_no and e.course_no and c.course_no = cs.course_no '+
                      'and vnum = ?', [vnum], (e,r,f) => {
-                        frs = time_left(r)
-                        res.json(frs)
+                        if (!e) {
+                            frs = time_left(r)
+                            res.json(frs)
+                        }
+                        else {
+                            next(e)
+                        }
                      })
+    }
+    else
+    {
+        res.render("error", {message: "no request sent. please ask me to do something", 
+                             error: {status:500, message:"better luck next time"}})
+    }
 })
 
-module.exports = {router}
+module.exports = router
